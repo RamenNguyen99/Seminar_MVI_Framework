@@ -8,6 +8,6 @@ import com.example.demo_mvi_framework.data.model.User
 sealed class MainState {
     object Idle: MainState()
     object Loading: MainState()
-    data class Users(val user: List<User>): MainState()
+    data class Users(val users: List<User>): MainState()
     data class Error(val Error: String?): MainState()
 }
