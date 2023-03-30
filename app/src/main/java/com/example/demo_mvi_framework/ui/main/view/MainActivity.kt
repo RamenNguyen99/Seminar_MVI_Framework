@@ -1,5 +1,6 @@
 package com.example.demo_mvi_framework.ui.main.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -25,17 +26,25 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
-    private var adapter = MainAdapter(arrayListOf())
+    private var adapter = MainAdapter(arrayListOf()) {
+        Log.i("TAG", "Call back receiver: $it")
+        goToDetails(it)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
-        setupUI()
-        setupViewModel()
+        setContentView(binding.root)
+        initView()
+        initViewModel()
         observeViewModel()
         handleEvents()
+    }
+
+    private fun goToDetails(user: User) {
+        startActivity(Intent(this, UserDetailActivity::class.java).apply {
+            putExtra("USER", user)
+        })
     }
 
     private fun observeViewModel() {
@@ -53,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                         is MainState.Users -> {
                             btnFetchUsers.visibility = View.GONE
                             progressBar.visibility = View.GONE
-                            displayList(it.user)
+                            displayList(it.users)
                         }
                         is MainState.Error -> {
                             btnFetchUsers.visibility = View.VISIBLE
@@ -82,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupViewModel() {
+    private fun initViewModel() {
         mainViewModel = ViewModelProvider(
             this,
             ViewModelFactory(
@@ -91,7 +100,7 @@ class MainActivity : AppCompatActivity() {
         )[MainViewModel::class.java]
     }
 
-    private fun setupUI() {
+    private fun initView() {
         binding.rvContainer.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             addItemDecoration(
