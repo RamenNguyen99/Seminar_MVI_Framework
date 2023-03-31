@@ -56,7 +56,8 @@ class MVIFragment : Fragment() {
     }
 
     private fun goToDetails(user: User) {
-        parentFragmentManager.beginTransaction()
+        parentFragmentManager
+            .beginTransaction()
             .replace(R.id.mainContainer, UserDetailFragment.newInstance(user))
             .addToBackStack(null)
             .commit()
