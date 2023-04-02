@@ -1,4 +1,4 @@
-package com.example.demo_mvi_framework.ui.main.adapter;
+package com.example.demo_mvi_framework.ui.main.userdetail;
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,10 +11,10 @@ import com.example.demo_mvi_framework.databinding.ItemLayoutBinding
 /**
  * Created by tuong.nguyen2 on 22/03/2023.
  */
-class MainAdapter(
+class UserDetailAdapter(
     private val users: ArrayList<User>,
     private val onItemClicked: (user: User) -> Unit
-) : RecyclerView.Adapter<MainAdapter.DataViewHolder>() {
+) : RecyclerView.Adapter<UserDetailAdapter.DataViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataViewHolder =
         DataViewHolder(
             ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false),

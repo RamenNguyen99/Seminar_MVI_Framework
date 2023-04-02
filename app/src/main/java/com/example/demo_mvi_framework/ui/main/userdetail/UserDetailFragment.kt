@@ -1,4 +1,4 @@
-package com.example.demo_mvi_framework.ui.main
+package com.example.demo_mvi_framework.ui.main.userdetail
 
 import android.os.Bundle
 import android.view.LayoutInflater
