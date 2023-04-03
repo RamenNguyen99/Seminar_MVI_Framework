@@ -6,7 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.demo_mvi_framework.R
@@ -18,6 +21,7 @@ import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
 import com.example.demo_mvi_framework.ui.mvvm.data.api.MVVMApiHelperImpl
 import com.example.demo_mvi_framework.ui.mvvm.viewmodel.MVVMViewModel
 import com.example.demo_mvi_framework.util.ViewModelFactory
+import kotlinx.coroutines.launch
 
 class MVVMFragment : Fragment() {
     private var _binding: FragmentMVVMBinding? = null
@@ -41,6 +45,42 @@ class MVVMFragment : Fragment() {
         initView()
         initViewModel()
         handleEvents()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userState.collect {
+                    if (it.isFetchedAPI) {
+                        displayList(it.users)
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.loadingState.collect {
+                    binding.progressBar.visibility =
+                        if (it.isShowLoading) View.VISIBLE else View.GONE
+                    binding.btnMVVMFetchUsers.visibility =
+                        if (it.isShowFetchUserButton) View.VISIBLE else View.GONE
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun displayList(users: List<User>) {
+        binding.run {
+            rvUsers.visibility = View.VISIBLE
+            adapter.run {
+                addData(users)
+                notifyDataSetChanged()
+            }
+        }
     }
 
     private fun goToDetails(user: User) {
@@ -53,25 +93,7 @@ class MVVMFragment : Fragment() {
 
     private fun handleEvents() {
         binding.btnMVVMFetchUsers.setOnClickListener {
-            binding.progressBar.visibility = View.VISIBLE
-//            if (viewModel.users!= null) {
-                viewModel.users?.let {
-                    Log.i("TAG", "handleEvents: da co users")
-                    displayList(it)
-                }
-//            }
-        }
-    }
-
-    private fun displayList(users: List<User>) {
-        binding.run {
-            rvUsers.visibility = View.VISIBLE
-            btnMVVMFetchUsers.visibility = View.GONE
-            progressBar.visibility = View.GONE
-            adapter.run {
-                addData(users)
-                notifyDataSetChanged()
-            }
+            viewModel.fetchUsers()
         }
     }
 
@@ -96,10 +118,5 @@ class MVVMFragment : Fragment() {
             )
             adapter = this@MVVMFragment.adapter
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.demo_mvi_framework.data.model.User
 import com.example.demo_mvi_framework.ui.mvvm.data.api.MVVMApiHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -15,22 +16,28 @@ import kotlinx.coroutines.launch
 class MVVMViewModel(
     private val apiHelper: MVVMApiHelper
 ) : ViewModel(), VMContract {
-    var users: List<User>? = null
-
-    init {
-        fetchUsers()
-    }
+    val userState = MutableStateFlow(Result(false, emptyList()))
+    val loadingState =
+        MutableStateFlow(Loading(isShowLoading = false, isShowFetchUserButton = true))
 
     override fun fetchUsers() {
         viewModelScope.launch {
+            loadingState.value = Loading(isShowLoading = true, isShowFetchUserButton = false)
             apiHelper.getUsers()
                 .flowOn(Dispatchers.IO)
-                .catch { e ->
+                .catch {
                     //handle exception
+                    loadingState.value =
+                        Loading(isShowLoading = false, isShowFetchUserButton = true)
                 }
                 .collect {
-                    users = it
+                    loadingState.value =
+                        Loading(isShowLoading = false, isShowFetchUserButton = false)
+                    userState.value = Result(true, it)
                 }
         }
     }
 }
+
+data class Result(val isFetchedAPI: Boolean, val users: List<User>)
+data class Loading(val isShowLoading: Boolean, val isShowFetchUserButton: Boolean)
