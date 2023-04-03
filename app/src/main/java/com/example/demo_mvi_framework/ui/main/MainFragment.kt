@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.example.demo_mvi_framework.R
 import com.example.demo_mvi_framework.databinding.FragmentMainBinding
 import com.example.demo_mvi_framework.ui.mvi.view.MVIFragment
+import com.example.demo_mvi_framework.ui.mvvm.view.MVVMFragment
 
 class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
@@ -28,6 +29,13 @@ class MainFragment : Fragment() {
                 parentFragmentManager
                     .beginTransaction()
                     .replace(R.id.mainContainer, MVIFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }
+            btnMVVM.setOnClickListener {
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.mainContainer, MVVMFragment())
                     .addToBackStack(null)
                     .commit()
             }

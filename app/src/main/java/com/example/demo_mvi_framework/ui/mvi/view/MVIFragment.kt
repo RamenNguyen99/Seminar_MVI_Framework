@@ -16,8 +16,8 @@ import com.example.demo_mvi_framework.data.api.ApiHelperImpl
 import com.example.demo_mvi_framework.data.api.RetrofitBuilder
 import com.example.demo_mvi_framework.data.model.User
 import com.example.demo_mvi_framework.databinding.FragmentMVIBinding
-import com.example.demo_mvi_framework.ui.main.UserDetailFragment
-import com.example.demo_mvi_framework.ui.main.adapter.MainAdapter
+import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
+import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailAdapter
 import com.example.demo_mvi_framework.ui.mvi.intent.MVIIntent
 import com.example.demo_mvi_framework.ui.mvi.viewmodel.MVIViewModel
 import com.example.demo_mvi_framework.ui.mvi.viewstate.MVIState
@@ -29,7 +29,7 @@ class MVIFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var mainViewModel: MVIViewModel
-    private var adapter = MainAdapter(arrayListOf()) {
+    private var adapter = UserDetailAdapter(arrayListOf()) {
         Log.i("TAG", "Call back receiver: $it")
         goToDetails(it)
     }
@@ -111,7 +111,7 @@ class MVIFragment : Fragment() {
         mainViewModel = ViewModelProvider(
             this,
             ViewModelFactory(
-                ApiHelperImpl(RetrofitBuilder.apiService)
+                ApiHelperImpl(RetrofitBuilder.apiService), null
             )
         )[MVIViewModel::class.java]
     }
