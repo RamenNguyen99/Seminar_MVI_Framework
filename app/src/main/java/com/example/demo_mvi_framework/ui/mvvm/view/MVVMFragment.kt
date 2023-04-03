@@ -13,12 +13,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.demo_mvi_framework.R
+import com.example.demo_mvi_framework.data.api.ApiHelperImpl
 import com.example.demo_mvi_framework.data.api.RetrofitBuilder
 import com.example.demo_mvi_framework.data.model.User
 import com.example.demo_mvi_framework.databinding.FragmentMVVMBinding
 import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailAdapter
 import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
-import com.example.demo_mvi_framework.ui.mvvm.data.api.MVVMApiHelperImpl
 import com.example.demo_mvi_framework.ui.mvvm.viewmodel.MVVMViewModel
 import com.example.demo_mvi_framework.util.ViewModelFactory
 import kotlinx.coroutines.launch
@@ -101,8 +101,7 @@ class MVVMFragment : Fragment() {
         viewModel = ViewModelProvider(
             this,
             ViewModelFactory(
-                null,
-                MVVMApiHelperImpl(RetrofitBuilder.apiService)
+                ApiHelperImpl(RetrofitBuilder.apiService)
             )
         )[MVVMViewModel::class.java]
     }

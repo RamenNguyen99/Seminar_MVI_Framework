@@ -3,7 +3,7 @@ package com.example.demo_mvi_framework.ui.mvvm.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.demo_mvi_framework.data.model.User
-import com.example.demo_mvi_framework.ui.mvvm.data.api.MVVMApiHelper
+import com.example.demo_mvi_framework.data.repository.MainRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * Created by tuong.nguyen2 on 31/03/2023.
  */
 class MVVMViewModel(
-    private val apiHelper: MVVMApiHelper
+    private val repository: MainRepository
 ) : ViewModel(), VMContract {
     val userState = MutableStateFlow(Result(false, emptyList()))
     val loadingState =
@@ -23,7 +23,7 @@ class MVVMViewModel(
     override fun fetchUsers() {
         viewModelScope.launch {
             loadingState.value = Loading(isShowLoading = true, isShowFetchUserButton = false)
-            apiHelper.getUsers()
+            repository.getUsers()
                 .flowOn(Dispatchers.IO)
                 .catch {
                     //handle exception

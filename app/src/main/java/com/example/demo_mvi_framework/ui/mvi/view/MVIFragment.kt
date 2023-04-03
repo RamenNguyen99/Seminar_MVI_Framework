@@ -16,8 +16,8 @@ import com.example.demo_mvi_framework.data.api.ApiHelperImpl
 import com.example.demo_mvi_framework.data.api.RetrofitBuilder
 import com.example.demo_mvi_framework.data.model.User
 import com.example.demo_mvi_framework.databinding.FragmentMVIBinding
-import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
 import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailAdapter
+import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
 import com.example.demo_mvi_framework.ui.mvi.intent.MVIIntent
 import com.example.demo_mvi_framework.ui.mvi.viewmodel.MVIViewModel
 import com.example.demo_mvi_framework.ui.mvi.viewstate.MVIState
@@ -111,7 +111,7 @@ class MVIFragment : Fragment() {
         mainViewModel = ViewModelProvider(
             this,
             ViewModelFactory(
-                ApiHelperImpl(RetrofitBuilder.apiService), null
+                ApiHelperImpl(RetrofitBuilder.apiService)
             )
         )[MVIViewModel::class.java]
     }
