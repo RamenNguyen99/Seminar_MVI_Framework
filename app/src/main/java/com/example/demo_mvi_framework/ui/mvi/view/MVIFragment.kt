@@ -44,8 +44,8 @@ class MVIFragment : Fragment() {
         initViewModel()
         initAdapter()
         initView()
-        observeViewModel()
         handleEvents()
+        observeViewModel()
     }
 
     override fun onDestroyView() {
