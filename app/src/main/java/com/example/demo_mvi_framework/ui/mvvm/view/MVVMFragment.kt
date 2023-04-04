@@ -1,7 +1,6 @@
 package com.example.demo_mvi_framework.ui.mvvm.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +12,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.demo_mvi_framework.R
+import com.example.demo_mvi_framework.data.api.ApiHelperImpl
 import com.example.demo_mvi_framework.data.api.RetrofitBuilder
 import com.example.demo_mvi_framework.data.model.User
 import com.example.demo_mvi_framework.databinding.FragmentMVVMBinding
 import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailAdapter
 import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
-import com.example.demo_mvi_framework.ui.mvvm.data.api.MVVMApiHelperImpl
 import com.example.demo_mvi_framework.ui.mvvm.viewmodel.MVVMViewModel
 import com.example.demo_mvi_framework.util.ViewModelFactory
 import kotlinx.coroutines.launch
@@ -26,10 +25,8 @@ import kotlinx.coroutines.launch
 class MVVMFragment : Fragment() {
     private var _binding: FragmentMVVMBinding? = null
     private val binding get() = _binding!!
-    private var adapter = UserDetailAdapter(arrayListOf()) {
-        Log.i("TAG", "Call back receiver: $it")
-        goToDetails(it)
-    }
+    private lateinit var adapter: UserDetailAdapter
+
     private lateinit var viewModel: MVVMViewModel
 
     override fun onCreateView(
@@ -42,15 +39,16 @@ class MVVMFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
         initViewModel()
+        initAdapter()
+        initView()
         handleEvents()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.userState.collect {
                     if (it.isFetchedAPI) {
-                        displayList(it.users)
+                        displayList()
                     }
                 }
             }
@@ -73,14 +71,9 @@ class MVVMFragment : Fragment() {
         _binding = null
     }
 
-    private fun displayList(users: List<User>) {
-        binding.run {
-            rvUsers.visibility = View.VISIBLE
-            adapter.run {
-                addData(users)
-                notifyDataSetChanged()
-            }
-        }
+    private fun displayList() {
+        binding.rvUsers.visibility = View.VISIBLE
+        adapter.notifyDataSetChanged()
     }
 
     private fun goToDetails(user: User) {
@@ -97,12 +90,17 @@ class MVVMFragment : Fragment() {
         }
     }
 
+    private fun initAdapter() {
+        adapter = UserDetailAdapter(viewModel.getUsers()) {
+            goToDetails(it)
+        }
+    }
+
     private fun initViewModel() {
         viewModel = ViewModelProvider(
             this,
             ViewModelFactory(
-                null,
-                MVVMApiHelperImpl(RetrofitBuilder.apiService)
+                ApiHelperImpl(RetrofitBuilder.apiService)
             )
         )[MVVMViewModel::class.java]
     }

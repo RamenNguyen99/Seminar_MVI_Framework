@@ -16,8 +16,8 @@ import com.example.demo_mvi_framework.data.api.ApiHelperImpl
 import com.example.demo_mvi_framework.data.api.RetrofitBuilder
 import com.example.demo_mvi_framework.data.model.User
 import com.example.demo_mvi_framework.databinding.FragmentMVIBinding
-import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
 import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailAdapter
+import com.example.demo_mvi_framework.ui.main.userdetail.UserDetailFragment
 import com.example.demo_mvi_framework.ui.mvi.intent.MVIIntent
 import com.example.demo_mvi_framework.ui.mvi.viewmodel.MVIViewModel
 import com.example.demo_mvi_framework.ui.mvi.viewstate.MVIState
@@ -28,11 +28,8 @@ class MVIFragment : Fragment() {
     private var _binding: FragmentMVIBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var mainViewModel: MVIViewModel
-    private var adapter = UserDetailAdapter(arrayListOf()) {
-        Log.i("TAG", "Call back receiver: $it")
-        goToDetails(it)
-    }
+    private lateinit var viewModel: MVIViewModel
+    private lateinit var adapter: UserDetailAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,10 +41,11 @@ class MVIFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
         initViewModel()
-        observeViewModel()
+        initAdapter()
+        initView()
         handleEvents()
+        observeViewModel()
     }
 
     override fun onDestroyView() {
@@ -66,7 +64,7 @@ class MVIFragment : Fragment() {
     private fun handleEvents() {
         binding.btnMVIFetchUsers.setOnClickListener {
             lifecycleScope.launch {
-                mainViewModel.userIntent.send(MVIIntent.FetchUser)
+                viewModel.userIntent.send(MVIIntent.FetchUser)
             }
         }
     }
@@ -74,7 +72,7 @@ class MVIFragment : Fragment() {
     private fun observeViewModel() {
         lifecycleScope.launch {
             binding.run {
-                mainViewModel.state.collect {
+                viewModel.state.collect {
                     when (it) {
                         is MVIState.Idle -> {
                             Log.i("TAG", "observeViewModel: IDLE dayyyy")
@@ -86,7 +84,8 @@ class MVIFragment : Fragment() {
                         is MVIState.Users -> {
                             btnMVIFetchUsers.visibility = View.GONE
                             progressBar.visibility = View.GONE
-                            displayList(it.users)
+                            Log.i("TAG", "observeViewModel: ${viewModel.getUsers().size}")
+                            displayList()
                         }
                         is MVIState.Error -> {
                             btnMVIFetchUsers.visibility = View.VISIBLE
@@ -99,19 +98,22 @@ class MVIFragment : Fragment() {
         }
     }
 
-    private fun displayList(users: List<User>) {
+    private fun displayList() {
         binding.rvUsers.visibility = View.VISIBLE
-        adapter.run {
-            addData(users)
-            notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun initAdapter() {
+        adapter = UserDetailAdapter(viewModel.getUsers()) {
+            goToDetails(it)
         }
     }
 
     private fun initViewModel() {
-        mainViewModel = ViewModelProvider(
+        viewModel = ViewModelProvider(
             this,
             ViewModelFactory(
-                ApiHelperImpl(RetrofitBuilder.apiService), null
+                ApiHelperImpl(RetrofitBuilder.apiService)
             )
         )[MVIViewModel::class.java]
     }
