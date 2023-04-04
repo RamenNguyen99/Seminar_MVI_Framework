@@ -20,6 +20,10 @@ class MVVMViewModel(
     val loadingState =
         MutableStateFlow(Loading(isShowLoading = false, isShowFetchUserButton = true))
 
+    private val users = mutableListOf<User>()
+
+    internal fun getUsers() = users
+
     override fun fetchUsers() {
         viewModelScope.launch {
             loadingState.value = Loading(isShowLoading = true, isShowFetchUserButton = false)
@@ -31,6 +35,10 @@ class MVVMViewModel(
                         Loading(isShowLoading = false, isShowFetchUserButton = true)
                 }
                 .collect {
+                    users.apply {
+                        clear()
+                        addAll(it)
+                    }
                     loadingState.value =
                         Loading(isShowLoading = false, isShowFetchUserButton = false)
                     userState.value = Result(true, it)

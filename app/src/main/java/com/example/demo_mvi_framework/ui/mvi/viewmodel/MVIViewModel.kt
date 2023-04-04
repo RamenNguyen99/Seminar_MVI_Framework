@@ -20,6 +20,8 @@ class MVIViewModel(
 ) : ViewModel() {
     val userIntent = Channel<MVIIntent>(Channel.UNLIMITED)
 
+    private val users = mutableListOf<User>()
+
     private val _state = MutableStateFlow<MVIState>(MVIState.Idle)
     val state: StateFlow<MVIState>
         get() = _state
@@ -27,6 +29,8 @@ class MVIViewModel(
     init {
         handleIntent()
     }
+
+    internal fun getUsers() = users
 
     private fun handleIntent() {
         viewModelScope.launch {
@@ -42,9 +46,9 @@ class MVIViewModel(
         viewModelScope.launch {
             _state.value = MVIState.Loading
             _state.value = try {
-                var users = listOf<User>()
                 repository.getUsers().collect {
-                    users = it
+                    users.clear()
+                    users.addAll(it)
                 }
                 MVIState.Users(users)
             } catch (e: Exception) {

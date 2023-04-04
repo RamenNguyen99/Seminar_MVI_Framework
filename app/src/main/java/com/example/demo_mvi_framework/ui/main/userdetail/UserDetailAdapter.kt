@@ -12,7 +12,7 @@ import com.example.demo_mvi_framework.databinding.ItemLayoutBinding
  * Created by tuong.nguyen2 on 22/03/2023.
  */
 class UserDetailAdapter(
-    private val users: ArrayList<User>,
+    private val users: List<User>,
     private val onItemClicked: (user: User) -> Unit
 ) : RecyclerView.Adapter<UserDetailAdapter.DataViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataViewHolder =
@@ -44,9 +44,5 @@ class UserDetailAdapter(
                 }
             }
         }
-    }
-
-    fun addData(users: List<User>) {
-        this.users.addAll(users)
     }
 }

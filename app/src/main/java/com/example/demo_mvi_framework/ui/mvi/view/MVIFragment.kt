@@ -28,11 +28,8 @@ class MVIFragment : Fragment() {
     private var _binding: FragmentMVIBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var mainViewModel: MVIViewModel
-    private var adapter = UserDetailAdapter(arrayListOf()) {
-        Log.i("TAG", "Call back receiver: $it")
-        goToDetails(it)
-    }
+    private lateinit var viewModel: MVIViewModel
+    private lateinit var adapter: UserDetailAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,8 +41,9 @@ class MVIFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
         initViewModel()
+        initAdapter()
+        initView()
         observeViewModel()
         handleEvents()
     }
@@ -66,7 +64,7 @@ class MVIFragment : Fragment() {
     private fun handleEvents() {
         binding.btnMVIFetchUsers.setOnClickListener {
             lifecycleScope.launch {
-                mainViewModel.userIntent.send(MVIIntent.FetchUser)
+                viewModel.userIntent.send(MVIIntent.FetchUser)
             }
         }
     }
@@ -74,7 +72,7 @@ class MVIFragment : Fragment() {
     private fun observeViewModel() {
         lifecycleScope.launch {
             binding.run {
-                mainViewModel.state.collect {
+                viewModel.state.collect {
                     when (it) {
                         is MVIState.Idle -> {
                             Log.i("TAG", "observeViewModel: IDLE dayyyy")
@@ -86,7 +84,8 @@ class MVIFragment : Fragment() {
                         is MVIState.Users -> {
                             btnMVIFetchUsers.visibility = View.GONE
                             progressBar.visibility = View.GONE
-                            displayList(it.users)
+                            Log.i("TAG", "observeViewModel: ${viewModel.getUsers().size}")
+                            displayList()
                         }
                         is MVIState.Error -> {
                             btnMVIFetchUsers.visibility = View.VISIBLE
@@ -99,16 +98,19 @@ class MVIFragment : Fragment() {
         }
     }
 
-    private fun displayList(users: List<User>) {
+    private fun displayList() {
         binding.rvUsers.visibility = View.VISIBLE
-        adapter.run {
-            addData(users)
-            notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun initAdapter() {
+        adapter = UserDetailAdapter(viewModel.getUsers()) {
+            goToDetails(it)
         }
     }
 
     private fun initViewModel() {
-        mainViewModel = ViewModelProvider(
+        viewModel = ViewModelProvider(
             this,
             ViewModelFactory(
                 ApiHelperImpl(RetrofitBuilder.apiService)
